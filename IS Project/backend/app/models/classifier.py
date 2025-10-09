@@ -12,7 +12,6 @@ model = load_model(MODEL_PATH)
 class_names = ["glioma", "meningioma", "notumor", "pituitary"]
 
 def predict_tumor(file_bytes):
-
     img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
     img = img.resize((128, 128))
 
@@ -22,8 +21,15 @@ def predict_tumor(file_bytes):
 
     pred = model.predict(img_array)
     pred_class = np.argmax(pred, axis=1)[0]
+    predicted_label = class_names[pred_class]
+
+    if predicted_label == "notumor":
+        tumor_status = "No Tumor Detected"
+    else:
+        tumor_status = f"Tumor Detected: {predicted_label.capitalize()}"
 
     return {
-        "predicted_class": class_names[pred_class],
+        "predicted_class": predicted_label,
+        "tumor_status": tumor_status,
         "probabilities": {cls: float(pred[0][i]) for i, cls in enumerate(class_names)}
     }
