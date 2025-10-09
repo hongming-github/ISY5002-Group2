@@ -126,9 +126,9 @@ if uploaded_file:
         perf_col1, perf_col2 = st.columns([1, 2])
 
         with perf_col1:
-            st.metric("Accuracy", "94%")
-            st.metric("Macro Avg F1", "93%")
-            st.metric("Weighted Avg F1", "94%")
+            st.metric("Accuracy", "95%")
+            st.metric("Macro Avg F1", "95%")
+            st.metric("Weighted Avg F1", "95%")
             st.metric("Validation Samples", "1311")
 
         with perf_col2:
@@ -141,9 +141,9 @@ if uploaded_file:
         with st.expander("📋 Detailed Classification Report"):
             metrics_data = {
                 "Class": ["Glioma", "Meningioma", "No Tumor", "Pituitary"],
-                "Precision": [0.97, 0.87, 0.96, 0.96],
-                "Recall": [0.84, 0.89, 1.00, 0.99],
-                "F1-Score": [0.90, 0.88, 0.98, 0.97],
+                "Precision": [0.92, 0.93, 0.98, 0.97],
+                "Recall": [0.93, 0.87, 1.00, 0.99],
+                "F1-Score": [0.93, 0.90, 0.99, 0.98],
                 "Support": [300, 306, 405, 300]
             }
             df_metrics = pd.DataFrame(metrics_data)
@@ -173,10 +173,10 @@ if uploaded_file:
         with st.expander("📘 Dataset & Training Details"):
             st.markdown(
                 """
-                - **Dataset:** Brain MRI Classification (Kaggle, 3264 images)  
+                - **Dataset:** Brain MRI Classification (Kaggle, 7023 images)  
                 - **Model:** CNN (4 Conv2D + Dense layers, dropout=0.5)  
                 - **Optimizer:** Adam (lr=0.0001), Loss: Categorical Crossentropy  
-                - **Epochs:** 50, Batch size: 32  
+                - **Epochs:** 50 (with early stop), Batch size: 32  
                 - **Hardware:** NVIDIA T4 GPU  
                 - **Evaluation Metrics:** Precision, Recall, F1-Score, Confusion Matrix  
                 """
