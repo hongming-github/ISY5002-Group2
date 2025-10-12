@@ -5,20 +5,18 @@ import numpy as np
 from PIL import Image
 import io, base64, cv2
 import os
-from app.utils.preprocess import crop_brain_region
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "brain_tumor_classification_model.keras")
 model = load_model(MODEL_PATH)
 model.build((None, 128, 128, 3))
 _ = model(np.zeros((1, 128, 128, 3), dtype=np.float32))
-model.summary()
 LAST_CONV_LAYER = "conv2d_74"
 class_names = ["glioma", "meningioma", "notumor", "pituitary"]
 
 def predict_tumor(file_bytes):
     img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
-    img_array, cropped, crop_box = preprocess(img)
+    img_array = preprocess(img)
     # Prediction
     pred = model.predict(img_array)
     pred_class = np.argmax(pred, axis=1)[0]
@@ -33,8 +31,6 @@ def predict_tumor(file_bytes):
     heatmap = make_smoothgrad_cam(img_array, model, LAST_CONV_LAYER, n_samples=20, noise_level=0.1)
 
     original = np.array(img) 
-    # overlay = overlay_heatmap_on_original(original, heatmap, crop_box, alpha=0.5)
-    
     heatmap = cv2.resize(heatmap, (original.shape[1], original.shape[0]))
     heatmap = np.uint8(255 * heatmap)
     heatmap_color = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
@@ -43,44 +39,22 @@ def predict_tumor(file_bytes):
     # Encode Grad-CAM image as base64
     buf = io.BytesIO()
     Image.fromarray(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB)).save(buf, format="JPEG")
-    img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    gradcam_image_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
-    def encode_img(img):
-        _, buffer = cv2.imencode('.jpg', cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-        return base64.b64encode(buffer).decode("utf-8")
-
-    cropped_b64 = encode_img(cropped)
     return {
         "predicted_class": predicted_label,
         "tumor_status": tumor_status,
         "probabilities": {cls: float(pred[0][i]) for i, cls in enumerate(class_names)},
-        "gradcam_image": img_base64,
-        "cropped_image": cropped_b64
+        "gradcam_image": gradcam_image_base64
     }
 
-def preprocess(img):
-    img_array = np.array(img)
 
-    # Step 1️⃣: Crop brain region
-    cropped, crop_box = crop_brain_region(img_array)
-
-    # Step 2️⃣: Convert to array for keras
-    img_array = image.img_to_array(cropped)
-
-    # Step 3️⃣: Expand dimension (batch=1)
+def preprocess(img_pil):
+    img = img_pil.resize((128, 128))
+    img_array = image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
-
-    # Step 4️⃣: Normalize to [0,1]
     img_array = img_array / 255.0
-
-    return img_array, cropped, crop_box
-# def preprocess(img_pil):
-   
-#     img = img_pil.resize((128, 128))
-#     img_array = image.img_to_array(img)
-#     img_array = np.expand_dims(img_array, axis=0)
-#     img_array = img_array / 255.0
-#     return img_array
+    return img_array
 
 def make_smoothgrad_cam(img_array, model, last_conv_layer_name,
                         pred_index=None, n_samples=20, noise_level=0.1):
@@ -156,31 +130,3 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     heatmap = heatmap.numpy()
 
     return heatmap
-
-def overlay_heatmap_on_original(original_img, heatmap, crop_box, alpha=0.2):
-    """
-    Map Grad-CAM heatmap (on cropped image) back to full-size original MRI.
-    original_img: np.array (H, W, 3)
-    heatmap: np.array (128, 128)
-    crop_box: (x, y, w, h)
-    alpha: blending ratio
-    Returns: composite image same size as original
-    """
-    x, y, w, h = crop_box
-    H, W = original_img.shape[:2]
-
-    # 1️⃣ Resize heatmap to cropped area size
-    heatmap_resized = cv2.resize(heatmap, (w, h))
-
-    # 2️⃣ Normalize and convert to color map
-    heatmap_resized = np.uint8(255 * heatmap_resized)
-    heatmap_color = cv2.applyColorMap(heatmap_resized, cv2.COLORMAP_JET)
-    heatmap_color = cv2.cvtColor(heatmap_color, cv2.COLOR_BGR2RGB)
-
-    # 3️⃣ Create full-size empty heatmap
-    full_heatmap = np.zeros_like(original_img, dtype=np.uint8)
-    full_heatmap[y:y+h, x:x+w] = heatmap_color
-
-    # 4️⃣ Blend with original
-    overlay = cv2.addWeighted(original_img, 1 - alpha, full_heatmap, alpha, 0)
-    return overlay

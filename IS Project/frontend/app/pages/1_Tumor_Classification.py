@@ -65,10 +65,11 @@ if uploaded_file:
         result = response.json()
         probs = result["probabilities"]
         max_prob = max(probs.values())
+        
         gradcam_bytes = base64.b64decode(result["gradcam_image"])
         gradcam_image = Image.open(io.BytesIO(gradcam_bytes))
         # Convert bytes to PIL image for display
-        img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
+        uploaded_image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
 
         # =========================
         # LAYOUT: IMAGE + RESULTS
@@ -77,10 +78,8 @@ if uploaded_file:
 
         # Left column: uploaded image and Grad-CAM visualization
         with col1:
-            st.image(img, caption="Uploaded MRI Image", use_container_width=True)
+            st.image(uploaded_image, caption="Uploaded MRI Image", use_container_width=True)
             st.image(gradcam_image, caption="Grad-CAM Heatmap", use_container_width=True)
-            st.image(base64.b64decode(result["cropped_image"]),
-                     caption="After Background Removal", use_container_width=True)
 
         # Right column: prediction results and probability visualization
         with col2:
