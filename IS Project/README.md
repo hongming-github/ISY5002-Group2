@@ -6,11 +6,11 @@ The system provides two key functionalities:
 
 1. **Tumor Classification**  
    - Upload an MRI image and classify whether a tumor is present.  
-   - Implemented with a CNN (currently dummy random output).  
+   - Implemented with a CNN.  
 
 2. **Predictive Image Generation**  
    - Upload a pre-op MRI and the first post-op MRI to generate a predicted second post-op MRI.  
-   - Implemented with a Pix2Pix cGAN (currently dummy image placeholder).  
+   - Implemented with a Pix2Pix cGAN.  
 
 The architecture integrates:
 - **FastAPI (backend)** – provides APIs for classification and image generation.  
@@ -28,8 +28,8 @@ project-root/
 │   │   ├── main.py
 │   │   ├── routes.py
 │   │   ├── models/
-│   │   │   ├── classifier.py        # Dummy tumor classifier (random)
-│   │   │   ├── generator.py         # Dummy image generator (PIL)
+│   │   │   ├── classifier.py        # tumor classifier 
+│   │   │   ├── generator.py         # image generator 
 │   │   ├── utils/
 │   │   │   ├── preprocess.py
 │   │   │   ├── evaluate.py
@@ -57,7 +57,16 @@ project-root/
 - **FastAPI** (backend API service)
 - **Streamlit** (frontend UI)
 - **Docker Compose** (orchestration)
-- **Pillow** (dummy image generation)
+
+---
+
+## 🧩 Key Features
+
+- ✅ **Explainable AI** via Grad-CAM visualization  
+- 🧠 **Real-time inference** through FastAPI  
+- 🎨 **Interactive frontend** built with Streamlit  
+- 🧰 **Modular codebase** with reusable components  
+- 🐳 **Containerized deployment** for reproducibility
 
 ---
 
@@ -91,12 +100,12 @@ docker-compose up --build
 ### Tumor Classification
 - Navigate to **"Tumor Classification"** page in Streamlit.  
 - Upload an MRI image.  
-- The backend (dummy model) will return `True` or `False`.  
+- The backend will return `True` or `False`.  
 
 ### Predictive MRI Generation
 - Navigate to **"Predictive Image Generation"** page.  
 - Upload **Pre-op MRI** and **1st Post-op MRI**.  
-- The backend (dummy model) will generate a placeholder MRI image.  
+- The backend will generate a placeholder MRI image.  
 
 ---
 
@@ -108,19 +117,6 @@ Best practice:
 - Use feature branches (`feature/classifier`, `feature/generator`)  
 - Submit Pull Requests for review  
 - Keep `main` branch stable for Docker deployment  
-
----
-
-## 🧪 Testing API (Optional)
-After containers are up, test APIs with `curl`:
-
-```bash
-# Tumor Classification
-curl -X POST "http://localhost:8000/classify"   -F "file=@sample_mri.jpg"
-
-# Predictive Image Generation
-curl -X POST "http://localhost:8000/generate"   -F "file1=@pre_op.jpg"   -F "file2=@post_op1.jpg"
-```
 
 ---
 
