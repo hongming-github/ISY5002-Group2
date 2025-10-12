@@ -5,7 +5,7 @@ import os
 
 os.chdir(os.path.dirname(__file__))
 
-model = load_model("brain_mri_model.keras")
+model = load_model("brain_tumor_classification_model.keras")
 
 img_path = "classifier_dataset/data_raw_dir/Testing/glioma/Te-gl_0166.jpg"
 img = image.load_img(img_path, target_size=(128,128))
