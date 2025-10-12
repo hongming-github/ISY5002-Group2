@@ -1,6 +1,5 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
 from .routes import router
-from tensorflow.keras.models import load_model
 
 app = FastAPI(title="Brain Tumor Project API")
 

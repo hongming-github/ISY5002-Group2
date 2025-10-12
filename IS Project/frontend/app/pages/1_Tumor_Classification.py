@@ -1,9 +1,8 @@
 import streamlit as st
-import requests
 import time
 import pandas as pd
 from PIL import Image
-import io
+import io, base64, requests
 import os
 
 API_URL = "http://backend:8000"
@@ -66,7 +65,8 @@ if uploaded_file:
         result = response.json()
         probs = result["probabilities"]
         max_prob = max(probs.values())
-
+        gradcam_bytes = base64.b64decode(result["gradcam_image"])
+        gradcam_image = Image.open(io.BytesIO(gradcam_bytes))
         # Convert bytes to PIL image for display
         img = Image.open(io.BytesIO(file_bytes)).convert("RGB")
 
@@ -78,14 +78,9 @@ if uploaded_file:
         # Left column: uploaded image and Grad-CAM visualization
         with col1:
             st.image(img, caption="Uploaded MRI Image", use_container_width=True)
-
-            with st.expander("🔍 Model Attention (Grad-CAM visualization)"):
-                st.info("Grad-CAM heatmap will be shown here (backend function placeholder).")
-                gradcam_path = "classification_matrix/gradcam.png"
-                if os.path.exists(gradcam_path):
-                    st.image(gradcam_path, caption="Example Heatmap", use_container_width=True)
-                else:
-                    st.write("Upload `gradcam.png` under classification_matrix/ to display example heatmap.")
+            st.image(gradcam_image, caption="Grad-CAM Heatmap", use_container_width=True)
+            st.image(base64.b64decode(result["cropped_image"]),
+                     caption="After Background Removal", use_container_width=True)
 
         # Right column: prediction results and probability visualization
         with col2:
