@@ -7,8 +7,9 @@ router = APIRouter()
 @router.post("/classify")
 async def classify(file: UploadFile = File(...)):
     # Receive MRI image and return classification result
-    result = predict_tumor(file.file)
-    return {"tumor_present": result}
+    file_bytes = await file.read()
+    result = predict_tumor(file_bytes)
+    return result
 
 @router.post("/generate")
 async def generate(file1: UploadFile = File(...), file2: UploadFile = File(...)):

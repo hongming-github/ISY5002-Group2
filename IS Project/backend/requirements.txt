@@ -3,6 +3,7 @@ uvicorn[standard]
 pillow
 python-multipart
 # Other dependencies can be added here
+opencv-python-headless==4.10.0.84
 
 numpy>=1.26.0
 matplotlib>=3.7.1

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
 from .routes import router
 
 app = FastAPI(title="Brain Tumor Project API")
